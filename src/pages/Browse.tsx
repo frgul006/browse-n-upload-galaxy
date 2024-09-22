@@ -1,44 +1,31 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useSupabase } from '../contexts/SupabaseContext';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-
-interface InventoryItem {
-  id: number;
-  name: string;
-  description: string;
-}
+import React, { useState } from "react";
+import { useInventories } from "../integrations/supabase/hooks/inventories";
+import { useItems } from "../integrations/supabase/hooks/items";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Inventory } from "../integrations/supabase/hooks/inventories";
+import { Item } from "../integrations/supabase/hooks/items";
 
 const Browse: React.FC = () => {
-  const { supabase } = useSupabase();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
-  const fetchInventory = async (): Promise<InventoryItem[]> => {
-    const { data, error } = await supabase
-      .from('inventory')
-      .select('*')
-      .ilike('name', `%${search}%`);
-    
-    if (error) throw error;
-    return data;
-  };
+  const {
+    data: inventories,
+    isLoading: inventoriesLoading,
+    error: inventoriesError,
+  } = useInventories();
 
-  const { data: inventory, isLoading, error } = useQuery({
-    queryKey: ['inventory', search],
-    queryFn: fetchInventory,
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {(error as Error).message}</div>;
+  if (inventoriesLoading) return <div>Loading...</div>;
+  if (inventoriesError)
+    return <div>Error: {(inventoriesError as Error).message}</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Browse Inventory</h1>
+      <h1 className="text-2xl font-bold mb-4">Browse Inventories</h1>
       <div className="flex mb-4">
         <Input
           type="text"
-          placeholder="Search inventory..."
+          placeholder="Search inventories..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="mr-2"
@@ -46,14 +33,47 @@ const Browse: React.FC = () => {
         <Button onClick={() => {}}>Search</Button>
       </div>
       <ul>
-        {inventory?.map((item) => (
+        {inventories?.map((inventory) => (
+          <InventoryItems
+            key={inventory.id}
+            inventory={inventory}
+            search={search}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const InventoryItems: React.FC<{ inventory: Inventory; search: string }> = ({
+  inventory,
+  search,
+}) => {
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    error: itemsError,
+  } = useItems(inventory.id);
+
+  if (itemsLoading) return <div>Loading items...</div>;
+  if (itemsError) return <div>Error: {(itemsError as Error).message}</div>;
+
+  const filteredItems = items?.filter((item: Item) =>
+    item.title?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <li className="mb-4 p-4 border rounded">
+      <h2 className="text-xl font-bold mb-2">{inventory.id}</h2>
+      <ul>
+        {filteredItems?.map((item: Item) => (
           <li key={item.id} className="mb-2 p-2 border rounded">
-            <h3 className="font-bold">{item.name}</h3>
+            <h3 className="font-bold">{item.title}</h3>
             <p>{item.description}</p>
           </li>
         ))}
       </ul>
-    </div>
+    </li>
   );
 };
 

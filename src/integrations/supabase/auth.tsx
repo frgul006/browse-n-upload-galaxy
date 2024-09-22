@@ -5,7 +5,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { Session } from "@supabase/supabase-js";
 
-const SupabaseAuthContext = createContext<
+export const SupabaseAuthContext = createContext<
   | { session: Session | null; loading: boolean; logout: () => Promise<void> }
   | undefined
 >(undefined);
@@ -64,10 +64,6 @@ export const SupabaseAuthProviderInner = ({
       {children}
     </SupabaseAuthContext.Provider>
   );
-};
-
-export const useSupabaseAuth = () => {
-  return useContext(SupabaseAuthContext);
 };
 
 export const SupabaseAuthUI = () => (
