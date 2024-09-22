@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Inventory } from "../integrations/supabase/hooks/inventories";
 import { Item } from "../integrations/supabase/hooks/items";
+import { supabase } from "../integrations/supabase/supabase"; // Assuming supabase is imported and configured
 
 const Browse: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -66,12 +67,30 @@ const InventoryItems: React.FC<{ inventory: Inventory; search: string }> = ({
     <li className="mb-4 p-4 border rounded">
       <h2 className="text-xl font-bold mb-2">{inventory.id}</h2>
       <ul>
-        {filteredItems?.map((item: Item) => (
-          <li key={item.id} className="mb-2 p-2 border rounded">
-            <h3 className="font-bold">{item.title}</h3>
-            <p>{item.description}</p>
-          </li>
-        ))}
+        {filteredItems?.map((item: Item) => {
+          if (!item.bucketItemName) return;
+          const imageUrl = supabase.storage
+            .from("inventory-images")
+            .getPublicUrl(item.bucketItemName).data.publicUrl;
+          return (
+            <li
+              key={item.id}
+              className="mb-2 p-2 border rounded flex items-center"
+            >
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt={item.title}
+                  className="w-16 h-16 mr-4"
+                />
+              )}
+              <div>
+                <h3 className="font-bold">{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </li>
   );
