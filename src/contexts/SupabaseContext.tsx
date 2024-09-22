@@ -4,8 +4,14 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and Anon Key must be provided in environment variables.');
+if (!supabaseUrl || supabaseUrl === 'your_supabase_project_url') {
+  console.error('Invalid or missing VITE_SUPABASE_URL');
+  throw new Error('Please set a valid VITE_SUPABASE_URL in your .env file');
+}
+
+if (!supabaseAnonKey || supabaseAnonKey === 'your_supabase_anon_key') {
+  console.error('Invalid or missing VITE_SUPABASE_ANON_KEY');
+  throw new Error('Please set a valid VITE_SUPABASE_ANON_KEY in your .env file');
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
