@@ -21,26 +21,27 @@ const Upload: React.FC = () => {
 
     try {
       // Upload image to Supabase Storage
-      let imagePath = null;
+      let imagePath: string | null = null;
       if (image) {
         const { data, error } = await supabase.storage
-          .from("images")
+          .from("inventory-images")
           .upload(`${Date.now()}-${image.name}`, image);
         if (error) throw error;
+        console.log(data);
         imagePath = data.path;
       }
 
-      // Insert inventory item into the database
-      const { data, error } = await supabase
-        .from("inventory")
-        .insert([
-          { name, description, image_path: imagePath, user_id: user.id },
-        ]);
+      // Call the generate-embeddings edge function
+      const { data: result, error: funcError } =
+        await supabase.functions.invoke("generate-embeddings", {
+          body: { imagePath },
+        });
 
-      if (error) throw error;
+      if (funcError) {
+        throw new Error("Failed to generate embeddings");
+      }
 
-      alert("Inventory item uploaded successfully!");
-      navigate("/");
+      console.log(result);
     } catch (error) {
       console.error("Error uploading inventory:", error);
       alert("Failed to upload inventory item.");
