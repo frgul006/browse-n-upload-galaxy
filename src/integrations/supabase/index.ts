@@ -4,7 +4,39 @@ import {
   SupabaseAuthProvider,
   useSupabaseAuth,
   SupabaseAuthUI,
-} from "./auth.js";
+} from "./auth";
 
-// Export all the imported functions and objects from .auth and .hooks/
-export { supabase, SupabaseAuthProvider, useSupabaseAuth, SupabaseAuthUI };
+// Import hooks
+import {
+  useInventory,
+  useInventories,
+  useAddInventory,
+  useUpdateInventory,
+  useDeleteInventory,
+} from "./hooks/inventories";
+
+import {
+  useItem,
+  useItems,
+  useAddItem,
+  useUpdateItem,
+  useDeleteItem,
+} from "./hooks/items";
+
+// Export all the imported functions and objects
+export {
+  supabase,
+  SupabaseAuthProvider,
+  useSupabaseAuth,
+  SupabaseAuthUI,
+  useInventory,
+  useInventories,
+  useAddInventory,
+  useUpdateInventory,
+  useDeleteInventory,
+  useItem,
+  useItems,
+  useAddItem,
+  useUpdateItem,
+  useDeleteItem,
+};
